@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import uuid from 'uuid/v4';
 import classNames from 'classnames';
 import { DndProvider, useDrag, useDrop, DragObjectWithType } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
@@ -6,55 +7,34 @@ import Backend from 'react-dnd-html5-backend';
 import Avatar from './components/Avatar';
 import Card from './components/Card';
 import CardDropzone from './components/CardDropzone';
+import Player from './components/Player';
 
 type Card = {
+  uuid: string;
   symbol: string;
   rank: string;
 };
 
 const mockStashedCards: Card[] = [
-  { symbol: 'SPADES', rank: '7' },
-  { symbol: 'HEARTS', rank: '7' },
-  { symbol: 'DIAMONDS', rank: '7' },
-  { symbol: 'CLUBS', rank: '7' },
+  { uuid: uuid(), symbol: 'SPADES', rank: '7' },
+  { uuid: uuid(), symbol: 'HEARTS', rank: '7' },
+  { uuid: uuid(), symbol: 'DIAMONDS', rank: '7' },
+  { uuid: uuid(), symbol: 'CLUBS', rank: '7' },
 ];
 
 const mockDropzoneCards: (Card | null)[] = [null, null, null, null];
 
 const mockHandCards: Card[] = [
-  { symbol: 'SPADES', rank: 'QUEEN' },
-  { symbol: 'DIAMONDS', rank: 'JACK' },
-  { symbol: 'SPADES', rank: 'JACK' },
-  { symbol: 'DIAMONDS', rank: '9' },
-  { symbol: 'HEARTS', rank: '9' },
-  { symbol: 'SPADES', rank: '9' },
-  { symbol: 'CLUBS', rank: '9' },
-  { symbol: 'DIAMONDS', rank: '4' },
-  { symbol: 'HEARTS', rank: '2' },
+  { uuid: uuid(), symbol: 'SPADES', rank: 'QUEEN' },
+  { uuid: uuid(), symbol: 'DIAMONDS', rank: 'JACK' },
+  { uuid: uuid(), symbol: 'SPADES', rank: 'JACK' },
+  { uuid: uuid(), symbol: 'DIAMONDS', rank: '9' },
+  { uuid: uuid(), symbol: 'HEARTS', rank: '9' },
+  { uuid: uuid(), symbol: 'SPADES', rank: '9' },
+  { uuid: uuid(), symbol: 'CLUBS', rank: '9' },
+  { uuid: uuid(), symbol: 'DIAMONDS', rank: '4' },
+  { uuid: uuid(), symbol: 'HEARTS', rank: '2' },
 ];
-
-type PlayerProps = {
-  username: String;
-  remainingCards: number;
-};
-
-function Player({ username, remainingCards }: PlayerProps) {
-  return (
-    <div className="flex flex-row items-center w-full p-2 bg-gray-800 rounded-lg mb-2">
-      <div className="mr-2">
-        <Avatar size={10} />
-      </div>
-      <div>
-        <span className="block text-white font-semibold leading-none">
-          {username}
-        </span>
-        <span className="text-gray-600 text-sm leading-none">
-          {remainingCards} cards
-        </span>
-      </div>
-    </div>
-  );
-}
 
 type DropzoneProps = {
   onCardDrop: Function;
@@ -63,9 +43,9 @@ type DropzoneProps = {
 
 function Dropzone({ onCardDrop, index }: DropzoneProps) {
   const [{ isOver }, drop] = useDrop({
-    accept: 'CARD',
-    drop: ({ symbol, rank }: DragObjectWithType & Card) => {
-      onCardDrop({ symbol, rank, index });
+    accept: 'HAND_CARD',
+    drop: ({ uuid }: DragObjectWithType & Card) => {
+      onCardDrop({ uuid, index });
     },
     collect: mon => ({
       isOver: !!mon.isOver(),
@@ -75,7 +55,7 @@ function Dropzone({ onCardDrop, index }: DropzoneProps) {
 
   return (
     <div ref={drop}>
-      <CardDropzone isValidDrop={isOver} />
+      <CardDropzone active={isOver} />
     </div>
   );
 }
@@ -109,7 +89,7 @@ function DropzoneStack({ cards, onCardDrop }: DropzoneStackProps) {
           {card === null ? (
             <Dropzone onCardDrop={onCardDrop} index={index} />
           ) : (
-            <Card symbol={card.symbol} rank={card.rank} />
+            <DraggableCard type="DROPZONE_CARD" card={card} />
           )}
         </div>
       ))}
@@ -146,18 +126,19 @@ function Board({ stashedCards, dropzoneCards, onCardDrop }: BoardProps) {
 
 type DraggableCardProps = {
   card: Card;
+  type: string;
 };
 
-function DraggableCard({ card }: DraggableCardProps) {
+function DraggableCard({ type, card }: DraggableCardProps) {
   const [{ isDragging }, drag] = useDrag({
-    item: { type: 'CARD', ...card },
+    item: { type, ...card },
     collect: monitor => ({
       isDragging: !!monitor.isDragging(),
     }),
   });
 
   const dragClassNames = classNames('cursor-grab active:cursor-grab', {
-    'opacity-50': isDragging,
+    invisible: isDragging,
   });
 
   return (
@@ -169,16 +150,30 @@ function DraggableCard({ card }: DraggableCardProps) {
 
 type HandProps = {
   cards: Card[];
+  onCardDrop: Function;
 };
 
-function Hand({ cards }: HandProps) {
+function Hand({ cards, onCardDrop }: HandProps) {
+  const [, drop] = useDrop({
+    accept: 'DROPZONE_CARD',
+    drop: ({ uuid }: DragObjectWithType & Card) => {
+      onCardDrop({ uuid });
+    },
+    collect: mon => ({
+      isOver: !!mon.isOver(),
+      canDrop: !!mon.canDrop(),
+    }),
+  });
+
   return (
-    <div className="flex flex-row">
-      {cards.map((card: Card, index: number) => (
-        <div key={`hand-card-${index}`} className="-mr-8 shadow-lg">
-          <DraggableCard card={card} />
-        </div>
-      ))}
+    <div ref={drop}>
+      <div className="flex flex-row">
+        {cards.map((card: Card, index: number) => (
+          <div key={`hand-card-${index}`} className="-mr-8 shadow-lg">
+            <DraggableCard type="HAND_CARD" card={card} />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -188,18 +183,26 @@ function App() {
   const [dropzoneCards, setDropzoneCards] = useState(mockDropzoneCards);
   const [handCards, setHandCards] = useState(mockHandCards);
 
-  const onCardDrop = ({
-    symbol,
-    rank,
-    index,
-  }: {
-    symbol: string;
-    rank: string;
-    index: number;
-  }) => {
-    const handCardIndex = handCards.findIndex(
-      card => card.symbol === symbol && card.rank === rank
+  const onMoveBackToHand = ({ uuid }: { uuid: string }) => {
+    const dropzoneCardIndex = dropzoneCards.findIndex(
+      c => c && c.uuid === uuid
     );
+
+    if (dropzoneCardIndex < 0) return;
+
+    const card = dropzoneCards[dropzoneCardIndex];
+    if (card === null) return;
+
+    setHandCards([...handCards, { ...card }]);
+    setDropzoneCards([
+      ...dropzoneCards.slice(0, dropzoneCardIndex),
+      null,
+      ...dropzoneCards.slice(dropzoneCardIndex + 1),
+    ]);
+  };
+
+  const onCardDrop = ({ uuid, index }: { uuid: string; index: number }) => {
+    const handCardIndex = handCards.findIndex(c => c.uuid === uuid);
 
     setDropzoneCards([
       ...dropzoneCards.slice(0, index),
@@ -227,16 +230,17 @@ function App() {
                 />
               </div>
               <div className="mt-10 -mb-12">
-                <Hand cards={handCards} />
+                <Hand cards={handCards} onCardDrop={onMoveBackToHand} />
               </div>
             </div>
           </DndProvider>
         </div>
         <div className="w-3/12 h-full p-4">
-          <Player username="Jon S." remainingCards={8} />
-          <Player username="Arya S." remainingCards={12} />
+          <Player username="Jon S." remainingCardsCount={8} />
+          <Player username="Arya S." remainingCardsCount={12} />
         </div>
       </div>
+      @
     </div>
   );
 }

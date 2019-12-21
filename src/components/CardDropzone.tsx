@@ -2,13 +2,13 @@ import React from 'react';
 import classNames from 'classnames';
 
 export type CardDropzone = {
-  isValidDrop?: boolean | null;
+  active?: boolean;
 };
 
-export function CardDropzone({ isValidDrop }: CardDropzone) {
+export function CardDropzone({ active }: CardDropzone) {
   const styles = classNames('w-32 h-48 rounded-lg border-2 border-dashed', {
-    'border-teal-300': isValidDrop,
-    'border-gray-600': !isValidDrop,
+    'border-blue-300': active,
+    'border-gray-600': !active,
   });
 
   return <div className={styles}></div>;
