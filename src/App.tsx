@@ -3,6 +3,10 @@ import classNames from 'classnames';
 import { DndProvider, useDrag, useDrop, DragObjectWithType } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 
+import Avatar from './components/Avatar';
+import Card from './components/Card';
+import CardDropzone from './components/CardDropzone';
+
 type Card = {
   symbol: string;
   rank: string;
@@ -29,17 +33,6 @@ const mockHandCards: Card[] = [
   { symbol: 'HEARTS', rank: '2' },
 ];
 
-type AvatarProps = {
-  size: number;
-};
-
-function Avatar({ size }: AvatarProps) {
-  const sizeClassNames = `w-${size} h-${size}`;
-  return (
-    <div className={`${sizeClassNames} rounded-lg bg-teal-800 mr-2`}></div>
-  );
-}
-
 type PlayerProps = {
   username: String;
   remainingCards: number;
@@ -48,7 +41,9 @@ type PlayerProps = {
 function Player({ username, remainingCards }: PlayerProps) {
   return (
     <div className="flex flex-row items-center w-full p-2 bg-gray-800 rounded-lg mb-2">
-      <Avatar size={10} />
+      <div className="mr-2">
+        <Avatar size={10} />
+      </div>
       <div>
         <span className="block text-white font-semibold leading-none">
           {username}
@@ -61,23 +56,13 @@ function Player({ username, remainingCards }: PlayerProps) {
   );
 }
 
-function Card({ symbol, rank }: Card) {
-  return (
-    <div className="flex items-center justify-center w-32 h-48 rounded-lg bg-gray-500 select-none">
-      <span className="text-gray-900 text-xs font-bold">
-        {rank} of {symbol}
-      </span>
-    </div>
-  );
-}
-
 type DropzoneProps = {
   onCardDrop: Function;
   index: number;
 };
 
 function Dropzone({ onCardDrop, index }: DropzoneProps) {
-  const [, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop({
     accept: 'CARD',
     drop: ({ symbol, rank }: DragObjectWithType & Card) => {
       onCardDrop({ symbol, rank, index });
@@ -89,10 +74,9 @@ function Dropzone({ onCardDrop, index }: DropzoneProps) {
   });
 
   return (
-    <div
-      className="w-32 h-48 rounded-lg border border-gray-500 border-dashed"
-      ref={drop}
-    ></div>
+    <div ref={drop}>
+      <CardDropzone isValidDrop={isOver} />
+    </div>
   );
 }
 
