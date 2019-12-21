@@ -1,4 +1,7 @@
 import React from 'react';
+import classNames from 'classnames';
+import { DndProvider, useDrag } from 'react-dnd';
+import Backend from 'react-dnd-html5-backend';
 
 type Card = {
   symbol: string;
@@ -107,18 +110,43 @@ function DropzoneStack({ cards }: DropzoneStackProps) {
 function Board() {
   return (
     <div>
-      <div className="flex flex-row items-center">
-        <div className="mr-8">
-          <Avatar size={10} />
+      <DndProvider backend={Backend}>
+        <div className="flex flex-row items-center">
+          <div className="mr-8">
+            <Avatar size={10} />
+          </div>
+          <Stack cards={stashedCards} />
         </div>
-        <Stack cards={stashedCards} />
-      </div>
+      </DndProvider>
       <div className="flex flex-row items-center mt-8">
         <div className="mr-8">
           <Avatar size={10} />
         </div>
         <DropzoneStack cards={4} />
       </div>
+    </div>
+  );
+}
+
+type DraggableCardProps = {
+  card: Card;
+};
+
+function DraggableCard({ card }: DraggableCardProps) {
+  const [{ isDragging }, drag] = useDrag({
+    item: { type: 'card', ...card },
+    collect: monitor => ({
+      isDragging: !!monitor.isDragging(),
+    }),
+  });
+
+  const dragClassNames = classNames({
+    'opacity-50': isDragging,
+  });
+
+  return (
+    <div ref={drag} className={dragClassNames}>
+      <Card symbol={card.symbol} rank={card.rank} />
     </div>
   );
 }
@@ -132,7 +160,7 @@ function Hand({ cards }: HandProps) {
     <div className="flex flex-row -mb-10">
       {cards.map((card: Card, index: number) => (
         <div key={`hand-card-${index}`} className="-mr-8 shadow-lg">
-          <Card symbol={card.symbol} rank={card.rank} />
+          <DraggableCard card={card} />
         </div>
       ))}
     </div>
@@ -144,8 +172,10 @@ function App() {
     <div className="bg-gray-900">
       <div className="flex flex-row w-full min-h-screen">
         <div className="w-9/12 h-full p-4">
-          <Board />
-          <Hand cards={handCards} />
+          <DndProvider backend={Backend}>
+            <Board />
+            <Hand cards={handCards} />
+          </DndProvider>
         </div>
         <div className="w-3/12 h-full p-4">
           <Player username="Jon S." remainingCards={8} />
