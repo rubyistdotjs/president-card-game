@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { DndProvider, useDrag, useDrop, DragObjectWithType } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 
 type Card = {
@@ -8,14 +8,16 @@ type Card = {
   rank: string;
 };
 
-const stashedCards: Card[] = [
+const mockStashedCards: Card[] = [
   { symbol: 'SPADES', rank: '7' },
   { symbol: 'HEARTS', rank: '7' },
   { symbol: 'DIAMONDS', rank: '7' },
   { symbol: 'CLUBS', rank: '7' },
 ];
 
-const handCards: Card[] = [
+const mockDropzoneCards: (Card | null)[] = [null, null, null, null];
+
+const mockHandCards: Card[] = [
   { symbol: 'SPADES', rank: 'QUEEN' },
   { symbol: 'DIAMONDS', rank: 'JACK' },
   { symbol: 'SPADES', rank: 'JACK' },
@@ -69,18 +71,23 @@ function Card({ symbol, rank }: Card) {
   );
 }
 
-function Dropzone() {
-  const [{ isOver, canDrop }, drop] = useDrop({
+type DropzoneProps = {
+  onCardDrop: Function;
+  index: number;
+};
+
+function Dropzone({ onCardDrop, index }: DropzoneProps) {
+  const [, drop] = useDrop({
     accept: 'CARD',
-    drop: () => console.log('drop'),
+    drop: ({ symbol, rank }: DragObjectWithType & Card) => {
+      onCardDrop({ symbol, rank, index });
+    },
     collect: mon => ({
       isOver: !!mon.isOver(),
       canDrop: !!mon.canDrop(),
     }),
   });
 
-  console.log(isOver);
-  console.log(canDrop);
   return (
     <div
       className="w-32 h-48 rounded-lg border border-gray-500 border-dashed"
@@ -106,22 +113,33 @@ function Stack({ cards }: StackProps) {
 }
 
 type DropzoneStackProps = {
-  cards: number;
+  cards: (Card | null)[];
+  onCardDrop: Function;
 };
 
-function DropzoneStack({ cards }: DropzoneStackProps) {
+function DropzoneStack({ cards, onCardDrop }: DropzoneStackProps) {
   return (
     <div className="flex flex-row">
-      {new Array(cards).fill(null).map((_: null, index: number) => (
+      {cards.map((card: Card | null, index: number) => (
         <div key={`stacked-dropzone-${index}`} className="mr-4">
-          <Dropzone />
+          {card === null ? (
+            <Dropzone onCardDrop={onCardDrop} index={index} />
+          ) : (
+            <Card symbol={card.symbol} rank={card.rank} />
+          )}
         </div>
       ))}
     </div>
   );
 }
 
-function Board() {
+type BoardProps = {
+  stashedCards: Card[];
+  dropzoneCards: (Card | null)[];
+  onCardDrop: Function;
+};
+
+function Board({ stashedCards, dropzoneCards, onCardDrop }: BoardProps) {
   return (
     <div>
       <DndProvider backend={Backend}>
@@ -136,7 +154,7 @@ function Board() {
         <div className="mr-8">
           <Avatar size={10} />
         </div>
-        <DropzoneStack cards={4} />
+        <DropzoneStack cards={dropzoneCards} onCardDrop={onCardDrop} />
       </div>
     </div>
   );
@@ -182,12 +200,45 @@ function Hand({ cards }: HandProps) {
 }
 
 function App() {
+  const [stashedCards, setStashedCards] = useState(mockStashedCards);
+  const [dropzoneCards, setDropzoneCards] = useState(mockDropzoneCards);
+  const [handCards, setHandCards] = useState(mockHandCards);
+
+  const onCardDrop = ({
+    symbol,
+    rank,
+    index,
+  }: {
+    symbol: string;
+    rank: string;
+    index: number;
+  }) => {
+    const handCardIndex = handCards.findIndex(
+      card => card.symbol === symbol && card.rank === rank
+    );
+
+    setDropzoneCards([
+      ...dropzoneCards.slice(0, index),
+      { ...handCards[handCardIndex] },
+      ...dropzoneCards.slice(index + 1),
+    ]);
+
+    setHandCards([
+      ...handCards.slice(0, handCardIndex),
+      ...handCards.slice(handCardIndex + 1),
+    ]);
+  };
+
   return (
     <div className="bg-gray-900">
       <div className="flex flex-row w-full min-h-screen">
         <div className="w-9/12 h-full p-4">
           <DndProvider backend={Backend}>
-            <Board />
+            <Board
+              stashedCards={stashedCards}
+              dropzoneCards={dropzoneCards}
+              onCardDrop={onCardDrop}
+            />
             <Hand cards={handCards} />
           </DndProvider>
         </div>
