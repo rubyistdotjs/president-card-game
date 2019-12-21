@@ -1,6 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
-import { DndProvider, useDrag } from 'react-dnd';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 
 type Card = {
@@ -70,8 +70,22 @@ function Card({ symbol, rank }: Card) {
 }
 
 function Dropzone() {
+  const [{ isOver, canDrop }, drop] = useDrop({
+    accept: 'CARD',
+    drop: () => console.log('drop'),
+    collect: mon => ({
+      isOver: !!mon.isOver(),
+      canDrop: !!mon.canDrop(),
+    }),
+  });
+
+  console.log(isOver);
+  console.log(canDrop);
   return (
-    <div className="w-32 h-48 rounded-lg border border-gray-500 border-dashed"></div>
+    <div
+      className="w-32 h-48 rounded-lg border border-gray-500 border-dashed"
+      ref={drop}
+    ></div>
   );
 }
 
@@ -134,7 +148,7 @@ type DraggableCardProps = {
 
 function DraggableCard({ card }: DraggableCardProps) {
   const [{ isDragging }, drag] = useDrag({
-    item: { type: 'card', ...card },
+    item: { type: 'CARD', ...card },
     collect: monitor => ({
       isDragging: !!monitor.isDragging(),
     }),
