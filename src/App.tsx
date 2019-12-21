@@ -1,5 +1,29 @@
 import React from 'react';
 
+type Card = {
+  symbol: string;
+  rank: string;
+};
+
+const stashedCards: Card[] = [
+  { symbol: 'SPADES', rank: '7' },
+  { symbol: 'HEARTS', rank: '7' },
+  { symbol: 'DIAMONDS', rank: '7' },
+  { symbol: 'CLUBS', rank: '7' },
+];
+
+const handCards: Card[] = [
+  { symbol: 'SPADES', rank: 'QUEEN' },
+  { symbol: 'DIAMONDS', rank: 'JACK' },
+  { symbol: 'SPADES', rank: 'JACK' },
+  { symbol: 'DIAMONDS', rank: '9' },
+  { symbol: 'HEARTS', rank: '9' },
+  { symbol: 'SPADES', rank: '9' },
+  { symbol: 'CLUBS', rank: '9' },
+  { symbol: 'DIAMONDS', rank: '4' },
+  { symbol: 'HEARTS', rank: '2' },
+];
+
 type AvatarProps = {
   size: number;
 };
@@ -32,8 +56,14 @@ function Player({ username, remainingCards }: PlayerProps) {
   );
 }
 
-function Card() {
-  return <div className="w-32 h-48 rounded-lg bg-gray-500"></div>;
+function Card({ symbol, rank }: Card) {
+  return (
+    <div className="flex items-center justify-center w-32 h-48 rounded-lg bg-gray-500">
+      <span className="text-gray-900 text-xs font-bold">
+        {rank} of {symbol}
+      </span>
+    </div>
+  );
 }
 
 function Dropzone() {
@@ -43,15 +73,15 @@ function Dropzone() {
 }
 
 type StackProps = {
-  cards: number;
+  cards: Card[];
 };
 
 function Stack({ cards }: StackProps) {
   return (
     <div className="flex flex-row">
-      {new Array(cards).fill(null).map((_: null, index: number) => (
+      {cards.map((card: Card, index: number) => (
         <div key={`stacked-card-${index}`} className="mr-4">
-          <Card />
+          <Card symbol={card.symbol} rank={card.rank} />
         </div>
       ))}
     </div>
@@ -62,7 +92,7 @@ type DropzoneStackProps = {
   cards: number;
 };
 
-function DropzoneStack({ cards }: StackProps) {
+function DropzoneStack({ cards }: DropzoneStackProps) {
   return (
     <div className="flex flex-row">
       {new Array(cards).fill(null).map((_: null, index: number) => (
@@ -81,7 +111,7 @@ function Board() {
         <div className="mr-8">
           <Avatar size={10} />
         </div>
-        <Stack cards={4} />
+        <Stack cards={stashedCards} />
       </div>
       <div className="flex flex-row items-center mt-8">
         <div className="mr-8">
@@ -94,15 +124,15 @@ function Board() {
 }
 
 type HandProps = {
-  cards: number;
+  cards: Card[];
 };
 
 function Hand({ cards }: HandProps) {
   return (
     <div className="flex flex-row -mb-10">
-      {new Array(cards).fill(null).map((_: null, index: number) => (
+      {cards.map((card: Card, index: number) => (
         <div key={`hand-card-${index}`} className="-mr-8 shadow-lg">
-          <Card />
+          <Card symbol={card.symbol} rank={card.rank} />
         </div>
       ))}
     </div>
@@ -115,7 +145,7 @@ function App() {
       <div className="flex flex-row w-full min-h-screen">
         <div className="w-9/12 h-full p-4">
           <Board />
-          <Hand cards={12} />
+          <Hand cards={handCards} />
         </div>
         <div className="w-3/12 h-full p-4">
           <Player username="Jon S." remainingCards={8} />
