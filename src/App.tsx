@@ -63,7 +63,7 @@ function Player({ username, remainingCards }: PlayerProps) {
 
 function Card({ symbol, rank }: Card) {
   return (
-    <div className="flex items-center justify-center w-32 h-48 rounded-lg bg-gray-500">
+    <div className="flex items-center justify-center w-32 h-48 rounded-lg bg-gray-500 select-none">
       <span className="text-gray-900 text-xs font-bold">
         {rank} of {symbol}
       </span>
@@ -172,7 +172,7 @@ function DraggableCard({ card }: DraggableCardProps) {
     }),
   });
 
-  const dragClassNames = classNames({
+  const dragClassNames = classNames('cursor-grab active:cursor-grab', {
     'opacity-50': isDragging,
   });
 
@@ -189,7 +189,7 @@ type HandProps = {
 
 function Hand({ cards }: HandProps) {
   return (
-    <div className="flex flex-row -mb-10">
+    <div className="flex flex-row">
       {cards.map((card: Card, index: number) => (
         <div key={`hand-card-${index}`} className="-mr-8 shadow-lg">
           <DraggableCard card={card} />
@@ -232,14 +232,20 @@ function App() {
   return (
     <div className="bg-gray-900">
       <div className="flex flex-row w-full min-h-screen">
-        <div className="w-9/12 h-full p-4">
+        <div className="w-9/12 min-h-full pt-4 pr-4 pl-4 overflow-hidden">
           <DndProvider backend={Backend}>
-            <Board
-              stashedCards={stashedCards}
-              dropzoneCards={dropzoneCards}
-              onCardDrop={onCardDrop}
-            />
-            <Hand cards={handCards} />
+            <div className="flex flex-col items-center h-full">
+              <div className="flex items-center h-full">
+                <Board
+                  stashedCards={stashedCards}
+                  dropzoneCards={dropzoneCards}
+                  onCardDrop={onCardDrop}
+                />
+              </div>
+              <div className="mt-10 -mb-12">
+                <Hand cards={handCards} />
+              </div>
+            </div>
           </DndProvider>
         </div>
         <div className="w-3/12 h-full p-4">

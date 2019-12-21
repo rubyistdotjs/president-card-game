@@ -3351,6 +3351,11 @@ video {
   cursor: not-allowed;
 }
 
+.cursor-grab {
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+
 .block {
   display: block;
 }
@@ -14110,6 +14115,11 @@ video {
 
   .sm\:cursor-not-allowed {
     cursor: not-allowed;
+  }
+
+  .sm\:cursor-grab {
+    cursor: -webkit-grab;
+    cursor: grab;
   }
 
   .sm\:block {
@@ -24874,6 +24884,11 @@ video {
     cursor: not-allowed;
   }
 
+  .md\:cursor-grab {
+    cursor: -webkit-grab;
+    cursor: grab;
+  }
+
   .md\:block {
     display: block;
   }
@@ -35636,6 +35651,11 @@ video {
     cursor: not-allowed;
   }
 
+  .lg\:cursor-grab {
+    cursor: -webkit-grab;
+    cursor: grab;
+  }
+
   .lg\:block {
     display: block;
   }
@@ -46396,6 +46416,11 @@ video {
 
   .xl\:cursor-not-allowed {
     cursor: not-allowed;
+  }
+
+  .xl\:cursor-grab {
+    cursor: -webkit-grab;
+    cursor: grab;
   }
 
   .xl\:block {
