@@ -4,12 +4,14 @@ import classNames from 'classnames';
 import { DndProvider, useDrag, useDrop, DragObjectWithType } from 'react-dnd';
 import Backend from 'react-dnd-html5-backend';
 
+import { sortCards, canPlayCard } from './utils/game';
+
 import Avatar from './components/Avatar';
 import Card from './components/Card';
 import CardDropzone from './components/CardDropzone';
 import Player from './components/Player';
 
-type Card = {
+export type Card = {
   uuid: string;
   symbol: string;
   rank: string;
@@ -37,15 +39,20 @@ const mockHandCards: Card[] = [
 ];
 
 type DropzoneProps = {
+  canDropCard: Function;
   onCardDrop: Function;
   index: number;
 };
 
-function Dropzone({ onCardDrop, index }: DropzoneProps) {
+function Dropzone({ canDropCard, onCardDrop, index }: DropzoneProps) {
   const [{ isOver }, drop] = useDrop({
     accept: 'HAND_CARD',
-    drop: ({ uuid }: DragObjectWithType & Card) => {
-      onCardDrop({ uuid, index });
+    canDrop: (item: DragObjectWithType & Card) => {
+      const { type, ...card } = item;
+      return canDropCard(card);
+    },
+    drop: ({ type, ...card }: DragObjectWithType & Card) => {
+      onCardDrop({ uuid: card.uuid, index });
     },
     collect: mon => ({
       isOver: !!mon.isOver(),
@@ -78,16 +85,21 @@ function Stack({ cards }: StackProps) {
 
 type DropzoneStackProps = {
   cards: (Card | null)[];
+  canDropCard: Function;
   onCardDrop: Function;
 };
 
-function DropzoneStack({ cards, onCardDrop }: DropzoneStackProps) {
+function DropzoneStack({ cards, canDropCard, onCardDrop }: DropzoneStackProps) {
   return (
     <div className="flex flex-row">
       {cards.map((card: Card | null, index: number) => (
         <div key={`stacked-dropzone-${index}`} className="mr-4">
           {card === null ? (
-            <Dropzone onCardDrop={onCardDrop} index={index} />
+            <Dropzone
+              canDropCard={canDropCard}
+              onCardDrop={onCardDrop}
+              index={index}
+            />
           ) : (
             <DraggableCard type="DROPZONE_CARD" card={card} />
           )}
@@ -100,25 +112,35 @@ function DropzoneStack({ cards, onCardDrop }: DropzoneStackProps) {
 type BoardProps = {
   stashedCards: Card[];
   dropzoneCards: (Card | null)[];
+  canDropCard: Function;
   onCardDrop: Function;
 };
 
-function Board({ stashedCards, dropzoneCards, onCardDrop }: BoardProps) {
+function Board({
+  stashedCards,
+  dropzoneCards,
+  canDropCard,
+  onCardDrop,
+}: BoardProps) {
   return (
     <div>
       <DndProvider backend={Backend}>
         <div className="flex flex-row items-center">
           <div className="mr-8">
-            <Avatar size={10} />
+            <Avatar size={12} />
           </div>
           <Stack cards={stashedCards} />
         </div>
       </DndProvider>
       <div className="flex flex-row items-center mt-8">
         <div className="mr-8">
-          <Avatar size={10} />
+          <Avatar size={12} />
         </div>
-        <DropzoneStack cards={dropzoneCards} onCardDrop={onCardDrop} />
+        <DropzoneStack
+          cards={dropzoneCards}
+          canDropCard={canDropCard}
+          onCardDrop={onCardDrop}
+        />
       </div>
     </div>
   );
@@ -165,11 +187,13 @@ function Hand({ cards, onCardDrop }: HandProps) {
     }),
   });
 
+  const sortedCards = sortCards(cards);
+
   return (
     <div ref={drop}>
       <div className="flex flex-row">
-        {cards.map((card: Card, index: number) => (
-          <div key={`hand-card-${index}`} className="-mr-8 shadow-lg">
+        {sortedCards.map((card: Card, index: number) => (
+          <div key={card.uuid} className="-mr-16 hover:-mt-6 shadow-2xl">
             <DraggableCard type="HAND_CARD" card={card} />
           </div>
         ))}
@@ -201,6 +225,13 @@ function App() {
     ]);
   };
 
+  const canDropCard = (card: Card) => {
+    const playedCards: Card[] = dropzoneCards.filter(
+      (c: Card | null): c is Card => c !== null
+    );
+    return canPlayCard(stashedCards, playedCards, card);
+  };
+
   const onCardDrop = ({ uuid, index }: { uuid: string; index: number }) => {
     const handCardIndex = handCards.findIndex(c => c.uuid === uuid);
 
@@ -217,7 +248,7 @@ function App() {
   };
 
   return (
-    <div className="bg-gray-900">
+    <div className="font-sans bg-gray-900">
       <div className="flex flex-row w-full min-h-screen">
         <div className="w-9/12 min-h-full pt-4 pr-4 pl-4 overflow-hidden">
           <DndProvider backend={Backend}>
@@ -226,21 +257,21 @@ function App() {
                 <Board
                   stashedCards={stashedCards}
                   dropzoneCards={dropzoneCards}
+                  canDropCard={canDropCard}
                   onCardDrop={onCardDrop}
                 />
               </div>
-              <div className="mt-10 -mb-12">
+              <div className="mt-10 -mb-16">
                 <Hand cards={handCards} onCardDrop={onMoveBackToHand} />
               </div>
             </div>
           </DndProvider>
         </div>
-        <div className="w-3/12 h-full p-4">
+        <div className="w-3/12 min-h-full p-2">
           <Player username="Jon S." remainingCardsCount={8} />
           <Player username="Arya S." remainingCardsCount={12} />
         </div>
       </div>
-      @
     </div>
   );
 }
