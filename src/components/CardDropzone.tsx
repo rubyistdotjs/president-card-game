@@ -6,7 +6,7 @@ export type CardDropzone = {
 };
 
 export function CardDropzone({ active }: CardDropzone) {
-  const styles = classNames('w-32 h-48 rounded-lg border-2 border-dashed', {
+  const styles = classNames('w-32 h-48 rounded border border-dashed', {
     'border-blue-300': active,
     'border-gray-600': !active,
   });
