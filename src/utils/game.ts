@@ -1,4 +1,4 @@
-import { Card } from '../App';
+import { Card } from './mockGame';
 
 export const cardRankWeights: string[] = [
   '3',

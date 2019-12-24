@@ -13,7 +13,7 @@ export function Player({ username, remainingCardsCount }: PlayerProps) {
       <div className="mr-3">
         <Avatar size={12} />
       </div>
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col justify-center">
         <span className="block text-white font-semibold leading-normal">
           {username}
         </span>
