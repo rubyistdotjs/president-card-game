@@ -9,6 +9,11 @@ export type Card = {
   symbol: string;
 };
 
+export type Stash = {
+  cards: Card[];
+  locked: boolean;
+};
+
 export type Player = {
   uuid: string;
   username: string;
@@ -22,15 +27,14 @@ export enum Action {
 }
 
 export type Move = {
-  uuid: string;
   playerUuid: string;
   action: Action;
-  cards: Card[];
+  cards: Card[] | null;
 };
 
 export type Turn = {
   startingPlayerUuid: string;
-  stash: Card[];
+  stash: Stash | null;
   moves: Move[];
 };
 

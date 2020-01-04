@@ -60,7 +60,7 @@ export function buildPlayers(users: User[]): Player[] {
 export function buildTurn(player: Player): Turn {
   return {
     startingPlayerUuid: player.uuid,
-    stash: [],
+    stash: null,
     moves: [],
   };
 }
