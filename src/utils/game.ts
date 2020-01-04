@@ -1,4 +1,4 @@
-import { Card } from './mockGame';
+import { Card } from '../game/types';
 
 export const cardRankWeights: string[] = [
   '3',
@@ -30,6 +30,8 @@ export function canPlayCard(
   playedCards: Card[],
   card: Card
 ): boolean {
+  if (stashedCards.length === 0 && playedCards.length === 0) return true;
+
   const weight = cardWeight(card);
 
   if (playedCards.length > 0) {
