@@ -21,7 +21,7 @@ export function sortCards(cards: Card[]): Card[] {
   return cards.sort((a, b) => cardWeight(a) - cardWeight(b));
 }
 
-function cardWeight(card: Card): number {
+export function cardWeight(card: Card): number {
   return cardRankWeights.indexOf(card.rank);
 }
 
