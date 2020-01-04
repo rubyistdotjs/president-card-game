@@ -1,3 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  @apply .text-white .font-sans .leading-normal .bg-gray-900 .subpixel-antialiased;
+}
