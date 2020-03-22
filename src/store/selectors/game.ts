@@ -33,7 +33,21 @@ export const lastMoveSelector = createSelector(
 export const lastMoveWithCardsSelector = createSelector(
   currentTurnMovesSelector,
   moves =>
-    (moves && moves.reverse().find(m => m.cards && m.cards.length > 0)) || null
+    (moves &&
+      moves
+        .slice()
+        .reverse()
+        .find(m => m.cards && m.cards.length > 0)) ||
+    null
+);
+
+export const lastMoveWithCardsPlayerSelector = createSelector(
+  playersSelector,
+  lastMoveWithCardsSelector,
+  (players, move) => {
+    if (move === null) return null;
+    return players?.find(({ id }) => id === move.playerId) || null;
+  }
 );
 
 export const activePlayerSelector = createSelector(
@@ -53,5 +67,22 @@ export const activePlayerSelector = createSelector(
     const nextPlayerIndex =
       lastPlayerIndex === players.length - 1 ? 0 : lastPlayerIndex + 1;
     return players[nextPlayerIndex];
+  }
+);
+
+export const playersWithLastMove = createSelector(
+  playersSelector,
+  currentTurnMovesSelector,
+  (players, moves) => {
+    if (players === null || moves === null) return null;
+
+    const reversedMoves = moves.slice().reverse();
+    return players.map(player => {
+      const lastMove = reversedMoves.find(m => m.playerId === player.id);
+      return {
+        ...player,
+        lastMove: lastMove || null,
+      };
+    });
   }
 );

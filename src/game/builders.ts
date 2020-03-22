@@ -50,7 +50,8 @@ export function buildPlayer(user: User): Player {
 }
 
 export function buildPlayers(users: User[]): Player[] {
-  const shuffledUsers = shuffle(users);
+  // const shuffledUsers = shuffle(users);
+  const shuffledUsers = users;
   const players: Player[] = shuffledUsers.map(buildPlayer);
   const hands: Card[][] = buildHands(players.length);
 

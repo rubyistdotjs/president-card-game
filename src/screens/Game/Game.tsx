@@ -5,9 +5,10 @@ import Backend from 'react-dnd-html5-backend';
 
 import { botMove } from '../../game/actions';
 import { canPlayCard } from '../../utils/game';
-import { Card as CardType } from '../../types';
+import { Card as CardType, Action } from '../../types';
 import {
   lastMoveWithCardsSelector,
+  lastMoveWithCardsPlayerSelector,
   activePlayerSelector,
 } from '../../store/selectors/game';
 import {
@@ -26,6 +27,7 @@ function Game() {
   const currentUserCards = useSelector(currentUserRemainingCardsSelector);
   const activePlayer = useSelector(activePlayerSelector);
   const lastMoveWithCards = useSelector(lastMoveWithCardsSelector);
+  const lastMovePlayer = useSelector(lastMoveWithCardsPlayerSelector);
 
   const [dropzoneCards, setDropzoneCards] = useState<(CardType | null)[]>([]);
 
@@ -44,12 +46,17 @@ function Game() {
     if (activePlayer && currentUser && activePlayer.id !== currentUser.id) {
       const move = botMove(lastMoveWithCards, false, activePlayer);
       setTimeout(() => {
-        console.log(activePlayer.username);
-        console.log(move);
         dispatch(addMove(activePlayer, move.action, move.cards));
-      }, 800);
+      }, 900);
     }
   }, [activePlayer, currentUser, dispatch, lastMoveWithCards]);
+
+  const onClickPlay = () => {
+    if (activePlayer && currentUser && activePlayer.id === currentUser.id) {
+      const cards = dropzoneCards.filter((c): c is CardType => c !== null);
+      dispatch(addMove(activePlayer, Action.PLAY, cards));
+    }
+  };
 
   const onMoveBackToHand = ({ id }: { id: string }) => {
     if (dropzoneCards.length < 1) return null;
@@ -97,10 +104,13 @@ function Game() {
       <div className="flex flex-col items-center h-full">
         <div className="flex items-center h-full">
           <Board
-            stashedCards={lastMoveWithCards?.cards || []}
+            lastMove={lastMoveWithCards}
+            lastMovePlayer={lastMovePlayer}
+            currentPlayer={activePlayer}
             dropzoneCards={dropzoneCards}
             canDropCard={canDropCard}
             onCardDrop={onCardDrop}
+            onClickPlay={onClickPlay}
           />
         </div>
         <div className="mt-10 -mb-16">

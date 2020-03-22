@@ -26,12 +26,12 @@ function GameScreen() {
         'Arya',
         'Sansa',
         'Jon',
-        'Brandon',
-        'Rickon',
-        'Robb',
+        'Tyrion',
+        'Sam',
+        'Davos',
       ]);
 
-      const players = buildPlayers([...bots, user]);
+      const players = buildPlayers([user, ...bots]);
       dispatch(initGame(players));
     }
   }, [dispatch, game, user]);

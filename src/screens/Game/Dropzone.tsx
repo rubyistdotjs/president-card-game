@@ -19,7 +19,7 @@ export function Dropzone({ canDropCard, onCardDrop, index }: DropzoneProps) {
       return canDropCard(card);
     },
     drop: ({ type, ...card }: DragObjectWithType & CardType) => {
-      onCardDrop({ uuid: card.id, index });
+      onCardDrop({ id: card.id, index });
     },
     collect: mon => ({
       isOver: !!mon.isOver(),
