@@ -1,15 +1,22 @@
 import React from 'react';
+import classnames from 'classnames';
 
 import Avatar from './Avatar';
 
 export type PlayerProps = {
   username: String;
   remainingCardsCount: number;
+  active: boolean;
 };
 
-export function Player({ username, remainingCardsCount }: PlayerProps) {
+export function Player({ username, active, remainingCardsCount }: PlayerProps) {
+  const classes = classnames(
+    'flex flex-row items-center w-full p-2 rounded-lg mb-2',
+    { 'bg-gray-900': !active, 'bg-gray-800': active }
+  );
+
   return (
-    <div className="flex flex-row items-center w-full p-2 bg-gray-900 rounded-lg mb-2">
+    <div className={classes}>
       <div className="mr-3">
         <Avatar size={12} />
       </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Card as CardType } from '../../game/types';
+import { Card as CardType } from '../../types';
 
 import DraggableCard from './DraggableCard';
 import Dropzone from './Dropzone';

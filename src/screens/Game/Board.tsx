@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Card as CardType } from '../../game/types';
+import { Card as CardType } from '../../types';
 
 import Avatar from '../../components/Avatar';
 import StackedCards from './StackedCards';

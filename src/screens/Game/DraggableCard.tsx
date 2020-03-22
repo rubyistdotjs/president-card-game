@@ -2,7 +2,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { useDrag } from 'react-dnd';
 
-import { Card as CardType } from '../../game/types';
+import { Card as CardType } from '../../types';
 
 import Card from '../../components/Card';
 

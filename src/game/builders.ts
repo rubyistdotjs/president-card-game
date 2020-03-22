@@ -1,8 +1,8 @@
 import { chunksOf } from 'fp-ts/lib/Array';
 
 import { deck, Card as DeckCard } from './deck';
-import { User, Player, Card, Turn, Game } from './types';
-import { withUuid, shuffle } from './utils';
+import { User, Player, Card, Turn, Game } from '../types';
+import { withId, shuffle } from './utils';
 
 export function buildHands(
   players: number,
@@ -13,7 +13,7 @@ export function buildHands(
   );
 
   const decks: DeckCard[][] = Array(decksCount).fill(deck);
-  const cards: Card[] = decks.flat().map(withUuid);
+  const cards: Card[] = decks.flat().map(withId);
 
   const shuffledCards: Card[] = shuffle(cards);
   const cardsPerPlayer = Math.floor(shuffledCards.length / players);
@@ -33,7 +33,7 @@ export function buildHands(
 }
 
 export function buildBot(username: string): User {
-  return withUuid({ username });
+  return withId({ username });
 }
 
 export function buildBots(usernames: string[]): User[] {
@@ -41,7 +41,12 @@ export function buildBots(usernames: string[]): User[] {
 }
 
 export function buildPlayer(user: User): Player {
-  return { uuid: user.uuid, username: user.username, cards: [] };
+  return {
+    id: user.id,
+    username: user.username,
+    cards: [],
+    remainingCards: [],
+  };
 }
 
 export function buildPlayers(users: User[]): Player[] {
@@ -53,14 +58,14 @@ export function buildPlayers(users: User[]): Player[] {
     (player: Player, i: number): Player => ({
       ...player,
       cards: hands[i],
+      remainingCards: hands[i],
     })
   );
 }
 
 export function buildTurn(player: Player): Turn {
   return {
-    startingPlayerUuid: player.uuid,
-    stash: null,
+    startingPlayerId: player.id,
     moves: [],
   };
 }
@@ -79,5 +84,5 @@ export function buildGame(users: User[]): Game {
     endedAt: null,
   };
 
-  return withUuid(game);
+  return withId(game);
 }

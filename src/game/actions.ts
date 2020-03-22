@@ -1,7 +1,7 @@
 import { groupSort } from 'fp-ts/lib/NonEmptyArray';
 import { sign } from 'fp-ts/lib/Ordering';
 
-import { Action, Card, Move, Player, Stash } from './types';
+import { Action, Card, Move, Player, Turn } from '../types';
 import { cardWeight } from '../utils/game';
 
 export function printCards(cards: Card[]) {
@@ -13,12 +13,15 @@ export const groupCards = groupSort({
   compare: (c1: Card, c2: Card) => sign(cardWeight(c1) - cardWeight(c2)),
 });
 
-export function botMove(stash: Stash, player: Player): Move {
+export function botMove(
+  move: Move | null,
+  locked: boolean,
+  player: Player
+): Move {
   const { cards } = player;
   const groupedCards = groupCards(cards);
-  const stashedCards = stash.cards;
 
-  if (stashedCards === null) {
+  if (move === null || move.cards === null) {
     const smallestCards = groupedCards[0];
 
     // Check if only 2 remaining after move
@@ -26,10 +29,11 @@ export function botMove(stash: Stash, player: Player): Move {
     return {
       action: Action.PLAY,
       cards: smallestCards,
-      playerUuid: player.uuid,
+      playerId: player.id,
     };
   }
 
+  const stashedCards = move.cards;
   const stashedCardsCount = stashedCards.length;
   const stashedCardsWeight = cardWeight(stashedCards[0]);
 
@@ -37,7 +41,7 @@ export function botMove(stash: Stash, player: Player): Move {
     if (cards.length !== stashedCardsCount) return false;
 
     const cardsWeight = cardWeight(cards[0]);
-    return stash.locked
+    return locked
       ? cardsWeight === stashedCardsWeight
       : cardsWeight >= stashedCardsWeight;
   });
@@ -48,13 +52,13 @@ export function botMove(stash: Stash, player: Player): Move {
     return {
       action: Action.PLAY,
       cards: playableGroupedCards[0],
-      playerUuid: player.uuid,
+      playerId: player.id,
     };
   } else {
     return {
-      action: stash.locked ? Action.SKIP : Action.PASS,
+      action: locked ? Action.SKIP : Action.PASS,
       cards: null,
-      playerUuid: player.uuid,
+      playerId: player.id,
     };
   }
 }

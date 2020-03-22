@@ -1,19 +1,9 @@
-import { Game } from '../../types';
-import {
-  INIT_GAME,
-  InitGame,
-  ADD_TURN,
-  AddTurn,
-  ADD_MOVE,
-  AddMove,
-} from '../actions/game';
-
-export type GameState = Game | null;
-export type GameTypes = InitGame | AddTurn | AddMove;
+import { GameState, GameAction } from '../types';
+import { INIT_GAME, ADD_TURN, ADD_MOVE } from '../actions/game';
 
 export function gameReducer(
   state: GameState = null,
-  action: GameTypes
+  action: GameAction
 ): GameState {
   switch (action.type) {
     case INIT_GAME:
@@ -34,7 +24,10 @@ export function gameReducer(
         ...state,
         turns: [
           ...state.turns,
-          { startingPlayerId: action.payload.startingPlayerId, moves: null },
+          {
+            startingPlayerId: action.payload.startingPlayerId,
+            moves: null,
+          },
         ],
       };
     case ADD_MOVE:

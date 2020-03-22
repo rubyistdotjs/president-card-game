@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDrop, DragObjectWithType } from 'react-dnd';
 
-import { Card as CardType } from '../../game/types';
+import { Card as CardType } from '../../types';
 import { sortCards } from '../../utils/game';
 
 import DraggableCard from './DraggableCard';
@@ -14,8 +14,8 @@ export type HandProps = {
 export function Hand({ cards, onCardDrop }: HandProps) {
   const [, drop] = useDrop({
     accept: 'DROPZONE_CARD',
-    drop: ({ uuid }: DragObjectWithType & CardType) => {
-      onCardDrop({ uuid });
+    drop: ({ id }: DragObjectWithType & CardType) => {
+      onCardDrop({ id });
     },
     collect: mon => ({
       isOver: !!mon.isOver(),
@@ -29,7 +29,7 @@ export function Hand({ cards, onCardDrop }: HandProps) {
     <div ref={drop}>
       <div className="flex flex-row">
         {sortedCards.map((card: CardType, index: number) => (
-          <div key={card.uuid} className="-mr-16 hover:-mt-6 shadow-2xl">
+          <div key={card.id} className="-mr-16 hover:-mt-6 shadow-2xl">
             <DraggableCard type="HAND_CARD" card={card} />
           </div>
         ))}

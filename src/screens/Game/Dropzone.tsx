@@ -1,7 +1,7 @@
 import React from 'react';
 import { useDrop, DragObjectWithType } from 'react-dnd';
 
-import { Card as CardType } from '../../game/types';
+import { Card as CardType } from '../../types';
 
 import CardDropzone from '../../components/CardDropzone';
 
@@ -19,7 +19,7 @@ export function Dropzone({ canDropCard, onCardDrop, index }: DropzoneProps) {
       return canDropCard(card);
     },
     drop: ({ type, ...card }: DragObjectWithType & CardType) => {
-      onCardDrop({ uuid: card.uuid, index });
+      onCardDrop({ uuid: card.id, index });
     },
     collect: mon => ({
       isOver: !!mon.isOver(),

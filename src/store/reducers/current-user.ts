@@ -1,12 +1,9 @@
-import { User } from '../../types';
-import { ADD_CURRENT_USER, AddCurrentUser } from '../actions/current-user';
-
-export type CurrentUserState = User | null;
-export type CurrentUserTypes = AddCurrentUser;
+import { CurrentUserState, CurrentUserAction } from '../types';
+import { ADD_CURRENT_USER } from '../actions/current-user';
 
 export function currentUserReducer(
   state: CurrentUserState = null,
-  action: CurrentUserTypes
+  action: CurrentUserAction
 ): CurrentUserState {
   switch (action.type) {
     case ADD_CURRENT_USER:

@@ -1,4 +1,4 @@
-import { Card } from '../game/types';
+import { Card } from '../types';
 
 export const cardRankWeights: string[] = [
   '3',

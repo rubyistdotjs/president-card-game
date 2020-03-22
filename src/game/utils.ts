@@ -1,7 +1,7 @@
 import uuid from 'uuid/v4';
 
-export function withUuid<T extends object>(obj: T): T & { uuid: string } {
-  return { uuid: uuid(), ...obj };
+export function withId<T extends object>(obj: T): T & { id: string } {
+  return { id: uuid(), ...obj };
 }
 
 export function shuffle<T>(array: T[]): T[] {
